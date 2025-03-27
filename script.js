@@ -1,11 +1,53 @@
+
+// api for game of thrones from TVmaze.com
+
+let url = 'https://api.tvmaze.com/shows/82/episodes'
+
+async function getEpisodes(params) {
+
+  try {
+    const res = await fetch(url);
+
+    if (!res.ok) {
+        throw new Error('Network response was not ok ' + res.statusText); 
+    }
+    const data = await res.json();
+    return data; // Return filtered episodes
+    } 
+    catch (error) {
+      displayErrorMessage('Sorry, there was an error loading the episodes. Please try again later.');
+  }
+}
+
+
+//Function Setup : To load this 3 functions when page is running.
+async function setup() {
+  const allEpisodes = await getEpisodes(); // Await the promise
+  state.allEpisodes = allEpisodes;
+  makePageForEpisodes(allEpisodes);
+  selector(allEpisodes);
+  userSelection();
+}
+
+// error handling
+function displayErrorMessage(message) {
+  const errorMessageDiv = document.getElementById('error-message');
+  errorMessageDiv.textContent = message;
+  errorMessageDiv.style.display = 'block'; // Show the error message
+}
+
+
 //All global variables defined here
-const allEpisodes = getAllEpisodes();
+const allEpisodes = getEpisodes();
 const filmCardContainer = document.getElementById("filmCard-container");
 const searchBox = document.getElementById("search-input");
+
 const state = { allEpisodes, searchTerm: "" };
+
 const dropDownSelector = document.getElementById("movie");
 let counter = document.getElementById('counter');
 //Function to display Dropdown Menu
+
 function selector(allEpisodes) {
   dropDownSelector.innerHTML = `<option value="">All Episodes</option>`;
   for (let n of allEpisodes) {
@@ -23,12 +65,7 @@ function selector(allEpisodes) {
       dropDownSelector.append(movieSelector);
     }
   }}
-//Function Setup : To load this 3 functions when page is running.
-function setup() {
-  makePageForEpisodes(allEpisodes);
-  selector(allEpisodes);
-  userSelection();
-}
+
 
 function makePageForEpisodes(episodeList) {
   counter.textContent = `Results:  ${episodeList.length}/${state.allEpisodes.length}`;
@@ -72,7 +109,6 @@ function searchRes(event){
 }
 searchBox.addEventListener("input", searchRes);
 
-window.onload = setup;
 //userSelection Function to render based on Option choice from dropdown
 function userSelection() {
   dropDownSelector.addEventListener("change", () => {
@@ -82,3 +118,5 @@ function userSelection() {
     counter.textContent = `Results: ${filteredEpisodes.length}/${state.allEpisodes.length}`;
   });
 }
+
+window.onload = setup;
